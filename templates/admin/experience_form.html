@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import csrf %}
+{% block title %}{{ 'Edit' if item else 'New' }} experience{% endblock %}
+{% block heading %}{{ 'Edit experience' if item else 'Add experience' }}{% endblock %}
+{% block content %}
+<form method="post" class="form panel grid-2">
+  {{ csrf() }}
+  <div><label for="role">Role / title *</label><input id="role" name="role" value="{{ f.get('role','') }}" required maxlength="150" placeholder="Python Intern"></div>
+  <div><label for="organization">Organization</label><input id="organization" name="organization" value="{{ f.get('organization','') }}" maxlength="200"></div>
+  <div>
+    <label for="kind">Type</label>
+    <select id="kind" name="kind">{% for k in kinds %}<option value="{{ k }}" {{ 'selected' if f.get('kind') == k }}>{{ k }}</option>{% endfor %}</select>
+  </div>
+  <div><label for="period">Period</label><input id="period" name="period" value="{{ f.get('period','') }}" maxlength="100" placeholder="Jun 2026 - Jul 2026"></div>
+  <div class="span-2"><label for="description">Description</label><textarea id="description" name="description" rows="5" maxlength="3000">{{ f.get('description','') }}</textarea></div>
+  <label class="check span-2"><input type="checkbox" name="published" {{ 'checked' if f.get('published') }}> Published (visible on the website)</label>
+  <div class="form-actions span-2">
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Save</button>
+    <a class="btn" href="{{ url_for('admin.experiences') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

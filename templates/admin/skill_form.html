@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import csrf %}
+{% block title %}{{ 'Edit' if item else 'New' }} skill{% endblock %}
+{% block heading %}{{ 'Edit skill' if item else 'Add a skill' }}{% endblock %}
+{% block content %}
+<form method="post" class="form panel grid-2">
+  {{ csrf() }}
+  <div><label for="name">Skill name</label><input id="name" name="name" value="{{ f.get('name','') }}" required maxlength="80"></div>
+  <div>
+    <label for="category">Category</label>
+    <input id="category" name="category" list="cats" value="{{ f.get('category','') }}" required maxlength="80">
+    <datalist id="cats">{% for c in categories %}<option value="{{ c }}">{% endfor %}</datalist>
+    <p class="hint">Pick an existing category or type a new one.</p>
+  </div>
+  <div>
+    <label for="proficiency">Proficiency (0-100)</label>
+    <input id="proficiency" name="proficiency" type="number" min="0" max="100" value="{{ f.get('proficiency', 0) }}">
+    <p class="hint">Leave at 0 if you do not want to show a level.</p>
+  </div>
+  <div>
+    <label for="icon">Icon classes</label>
+    <input id="icon" name="icon" list="icons" value="{{ f.get('icon','') }}" maxlength="100" placeholder="devicon-python-plain colored">
+    <datalist id="icons">
+      {% for i in ['devicon-python-plain colored','devicon-java-plain colored','devicon-javascript-plain colored','devicon-html5-plain colored','devicon-css3-plain colored','devicon-react-original colored','devicon-flask-original','devicon-fastapi-plain colored','devicon-mysql-original colored','devicon-mongodb-plain colored','devicon-git-plain colored','devicon-github-original','devicon-vscode-plain colored','devicon-postman-plain colored','devicon-django-plain','devicon-nodejs-plain colored','devicon-numpy-original colored','devicon-pandas-original','devicon-tensorflow-original colored','devicon-opencv-plain colored','devicon-sqlite-plain colored','devicon-bootstrap-plain colored','devicon-cplusplus-plain colored','devicon-c-plain colored','bi bi-cpu','bi bi-stars','bi bi-chat-square-text','bi bi-code-slash'] %}<option value="{{ i }}">{% endfor %}
+    </datalist>
+    <p class="hint">Browse icon names at <a href="https://devicon.dev" target="_blank" rel="noopener">devicon.dev</a> or <a href="https://icons.getbootstrap.com" target="_blank" rel="noopener">icons.getbootstrap.com</a>.</p>
+  </div>
+  <label class="check span-2"><input type="checkbox" name="enabled" {{ 'checked' if f.get('enabled') }}> Show this skill on the website</label>
+  <div class="form-actions span-2">
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Save skill</button>
+    <a class="btn" href="{{ url_for('admin.skills') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,32 @@
+# Render Blueprint: Render reads this file when you create a "Blueprint" from your GitHub repo.
+services:
+  - type: web
+    name: ruban-portfolio
+    runtime: python
+    plan: starter            # a persistent Disk needs a paid plan (see README, section "Persistence")
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 60
+    healthCheckPath: /
+    disk:
+      name: portfolio-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATA_DIR
+        value: /var/data
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: ADMIN_SETUP_KEY
+        generateValue: true
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: CONTACT_TO_EMAIL
+        value: rubansamuel2007@gmail.com
+      - key: GITHUB_TOKEN
+        sync: false

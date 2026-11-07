@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import csrf %}
+{% block title %}Skills{% endblock %}
+{% block heading %}Skills management{% endblock %}
+{% block actions %}<a class="btn btn-primary btn-sm" href="{{ url_for('admin.skill_new') }}"><i class="bi bi-plus-lg"></i> Add skill</a>{% endblock %}
+{% block content %}
+<p class="muted">Edit a row and press <strong>Save</strong>. Proficiency is yours to set (0 = not rated, no bar is shown on the website). Use the arrows to reorder skills within their category. Disabled skills are hidden from the public site.</p>
+<datalist id="cats">{% for c, _ in groups %}<option value="{{ c }}">{% endfor %}</datalist>
+
+{% for category, items in groups %}
+  <div class="cat-title"><i class="bi bi-folder2-open"></i> {{ category }} <span class="badge">{{ items|length }}</span></div>
+  {% for s in items %}
+  <form class="skill-row {{ 'disabled' if not s.enabled }}" method="post" action="{{ url_for('admin.skill_edit', sid=s.id) }}">
+    {{ csrf() }}
+    <div class="ico">{% if s.icon %}<i class="{{ s.icon }}"></i>{% else %}<i class="bi bi-code-slash"></i>{% endif %}</div>
+    <input name="name" value="{{ s.name }}" required maxlength="80" aria-label="Skill name">
+    <input name="category" value="{{ s.category }}" list="cats" required maxlength="80" aria-label="Category">
+    <input name="icon" value="{{ s.icon }}" maxlength="100" placeholder="icon classes" aria-label="Icon classes">
+    <div class="lvl"><input name="proficiency" type="number" min="0" max="100" value="{{ s.proficiency }}" aria-label="Proficiency percent"><span class="muted">%</span></div>
+    <div class="actions">
+      <label class="check" style="margin:0"><input type="checkbox" name="enabled" {{ 'checked' if s.enabled }}> On</label>
+      <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-check-lg"></i> Save</button>
+      <button class="btn btn-sm btn-icon" type="submit" formaction="{{ url_for('admin.move', resource='skills', item_id=s.id, direction='up') }}" formnovalidate title="Move up" aria-label="Move up"><i class="bi bi-arrow-up"></i></button>
+      <button class="btn btn-sm btn-icon" type="submit" formaction="{{ url_for('admin.move', resource='skills', item_id=s.id, direction='down') }}" formnovalidate title="Move down" aria-label="Move down"><i class="bi bi-arrow-down"></i></button>
+      <button class="btn btn-sm btn-icon btn-danger" type="submit" formaction="{{ url_for('admin.skill_delete', sid=s.id) }}" formnovalidate data-confirm="Delete the skill '{{ s.name }}'?" title="Delete" aria-label="Delete"><i class="bi bi-trash"></i></button>
+    </div>
+  </form>
+  {% endfor %}
+{% else %}
+  <div class="empty">No skills yet. <a href="{{ url_for('admin.skill_new') }}">Add your first skill</a>.</div>
+{% endfor %}
+{% endblock %}
+{% block scripts %}
+<script>
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-confirm]');
+    if (b && !window.confirm(b.getAttribute('data-confirm'))) e.preventDefault();
+  });
+</script>
+{% endblock %}

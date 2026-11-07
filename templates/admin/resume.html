@@ -1,0 +1,58 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import csrf %}
+{% block title %}Resume{% endblock %}
+{% block heading %}Resume management{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2 class="h2">Currently used on the website</h2>
+  {% if info.available %}
+    <p><strong>{{ info.title }}</strong> &middot; <span class="badge ok">{{ 'Uploaded PDF' if info.source == 'file' else 'External link' }}</span></p>
+    <p class="actions">
+      <a class="btn btn-sm" href="{{ info.view_url }}" target="_blank" rel="noopener"><i class="bi bi-eye"></i> View</a>
+      <a class="btn btn-sm" href="{{ url_for('public.resume_download') }}"><i class="bi bi-download"></i> Test download</a>
+    </p>
+    <iframe class="resume-preview" src="{{ info.preview_url }}" title="Resume preview" loading="lazy"></iframe>
+  {% else %}
+    <p class="muted">No resume is configured yet. Upload a PDF or add a link below.</p>
+  {% endif %}
+</section>
+
+<div class="two-col">
+  <section class="panel">
+    <h2 class="h2">Upload a new PDF</h2>
+    <form method="post" enctype="multipart/form-data">
+      {{ csrf() }}<input type="hidden" name="action" value="upload">
+      <label for="resume_file">PDF file (max 10 MB)</label>
+      <input id="resume_file" name="resume_file" type="file" accept="application/pdf" required>
+      <p class="hint">The new file immediately becomes the website's resume. Any previously uploaded PDF is deleted.</p>
+      <div class="form-actions"><button class="btn btn-primary" type="submit"><i class="bi bi-upload"></i> Upload and use</button></div>
+    </form>
+    {% if S.resume_file %}
+    <form method="post" data-confirm="Remove the uploaded PDF? The website will use the resume URL again.">
+      {{ csrf() }}<input type="hidden" name="action" value="remove_file">
+      <button class="btn btn-sm btn-danger" type="submit"><i class="bi bi-trash"></i> Remove uploaded PDF</button>
+    </form>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2 class="h2">Use a link instead (e.g. Google Drive)</h2>
+    <form method="post">
+      {{ csrf() }}<input type="hidden" name="action" value="url">
+      <label for="resume_url">Resume URL</label>
+      <input id="resume_url" name="resume_url" type="url" required maxlength="300" value="{{ S.resume_url }}">
+      <p class="hint">Make sure the Drive link is shared as "Anyone with the link can view".</p>
+      <div class="form-actions"><button class="btn btn-primary" type="submit"><i class="bi bi-link-45deg"></i> Save and use link</button></div>
+    </form>
+  </section>
+</div>
+
+<section class="panel">
+  <h2 class="h2">Displayed resume title</h2>
+  <form method="post" class="grid-2">
+    {{ csrf() }}<input type="hidden" name="action" value="title">
+    <div><label for="resume_title">Title shown on the website</label><input id="resume_title" name="resume_title" value="{{ S.resume_title }}" required maxlength="150"></div>
+    <div style="align-self:end"><button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Save title</button></div>
+  </form>
+</section>
+{% endblock %}

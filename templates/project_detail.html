@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }} | {{ profile.full_name }}{% endblock %}
+{% block description %}{{ project.short_description or project.overview[:150] }}{% endblock %}
+
+{% block content %}
+<article class="detail">
+  <header class="detail-hero">
+    <div class="container narrow">
+      <a class="back-link" href="{{ url_for('public.index') }}#projects"><i class="bi bi-arrow-left"></i> All projects</a>
+      {% if project.category %}<span class="tag-cat">{{ project.category }}</span>{% endif %}
+      <h1>{{ project.title }}</h1>
+      {% if project.short_description %}<p class="detail-lead">{{ project.short_description }}</p>{% endif %}
+      <dl class="detail-meta">
+        {% if project.category %}<div><dt>Category</dt><dd>{{ project.category }}</dd></div>{% endif %}
+        {% if project.completed_on %}<div><dt>Completed</dt><dd>{{ project.completed_on.strftime('%B %Y') }}</dd></div>{% endif %}
+      </dl>
+      <div class="card-actions">
+        {% if project.github_url %}<a class="btn btn-primary" href="{{ project.github_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-github"></i> GitHub Repository</a>{% endif %}
+        {% if project.live_url %}<a class="btn btn-ghost" href="{{ project.live_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> Live Demo</a>{% endif %}
+      </div>
+    </div>
+  </header>
+
+  <div class="container narrow detail-body">
+    {% if project.thumbnail %}
+    <img class="detail-cover" src="{{ upload_url(project.thumbnail) }}" alt="{{ project.title }} cover image" width="1000" height="560">
+    {% endif %}
+
+    {% if project.overview %}<section class="detail-block"><h2>Overview</h2>{% for para in project.overview|paragraphs %}<p>{{ para }}</p>{% endfor %}</section>{% endif %}
+    {% if project.problem %}<section class="detail-block"><h2>Problem statement</h2>{% for para in project.problem|paragraphs %}<p>{{ para }}</p>{% endfor %}</section>{% endif %}
+    {% if project.solution %}<section class="detail-block"><h2>Proposed solution</h2>{% for para in project.solution|paragraphs %}<p>{{ para }}</p>{% endfor %}</section>{% endif %}
+
+    {% if project.feature_list %}
+    <section class="detail-block"><h2>Key features</h2>
+      <ul class="check-list">{% for f in project.feature_list %}<li>{{ f }}</li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+
+    {% if project.tech_names %}
+    <section class="detail-block"><h2>Technologies used</h2>
+      <ul class="chips big">{% for t in project.tech_names %}<li>{{ t }}</li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+
+    {% if project.methodology %}<section class="detail-block"><h2>Development methodology</h2>{% for para in project.methodology|paragraphs %}<p>{{ para }}</p>{% endfor %}</section>{% endif %}
+
+    {% if project.screenshot_list %}
+    <section class="detail-block"><h2>Screenshots</h2>
+      <div class="shots">
+        {% for shot in project.screenshot_list %}
+        <button type="button" class="shot" data-viewer data-src="{{ upload_url(shot) }}" data-type="image" data-title="{{ project.title }} - screenshot {{ loop.index }}">
+          <img src="{{ upload_url(shot) }}" alt="{{ project.title }} screenshot {{ loop.index }}" loading="lazy" width="600" height="380">
+        </button>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import post_button %}
+{% block title %}Messages{% endblock %}
+{% block heading %}Contact messages{% endblock %}
+{% block content %}
+{% for m in items %}
+<details class="msg {{ 'unread' if not m.is_read }}">
+  <summary>
+    <span class="badge {{ 'off' if m.is_read else 'warn' }}">{{ 'Read' if m.is_read else 'New' }}</span>
+    <span class="who">{{ m.name }}</span>
+    <span>{{ m.subject }}</span>
+    <span class="when">{{ m.created_at|localtime }}</span>
+  </summary>
+  <div class="body">
+    <p class="muted">From <a href="mailto:{{ m.email }}">{{ m.email }}</a>{% if not m.email_sent %} &middot; <span class="badge warn">Email notification not delivered</span>{% endif %}</p>
+    <pre>{{ m.message }}</pre>
+    <div class="actions">
+      <a class="btn btn-sm btn-primary" href="mailto:{{ m.email }}?subject={{ ('Re: ' ~ m.subject)|urlencode }}"><i class="bi bi-reply"></i> Reply</a>
+      {{ post_button(url_for('admin.message_toggle', mid=m.id), 'Mark as unread' if m.is_read else 'Mark as read', 'envelope-open' if not m.is_read else 'envelope') }}
+      {{ post_button(url_for('admin.message_delete', mid=m.id), 'Delete', 'trash', 'btn-sm btn-icon btn-danger', 'Delete this message?') }}
+    </div>
+  </div>
+</details>
+{% else %}
+<div class="empty">No messages yet. Messages sent from the website contact form appear here.</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import post_button, order_buttons, badge %}
+{% block title %}Projects{% endblock %}
+{% block heading %}Project management{% endblock %}
+{% block actions %}<a class="btn btn-primary btn-sm" href="{{ url_for('admin.project_new') }}"><i class="bi bi-plus-lg"></i> New project</a>{% endblock %}
+{% block content %}
+{% if items %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Thumbnail</th><th>Project</th><th>Status</th><th>Order</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for p in items %}
+      <tr>
+        <td><img class="thumb" loading="lazy" src="{{ upload_url(p.thumbnail) if p.thumbnail else url_for('static', filename='img/project-placeholder.svg') }}" alt=""></td>
+        <td><strong>{{ p.title }}</strong><br><span class="muted">{{ p.category or 'No category' }} &middot; {{ p.tech_names|length }} technologies</span></td>
+        <td>
+          {{ badge(p.published, 'Published', 'Hidden') }}
+          {% if p.featured %}<span class="badge warn">Featured</span>{% endif %}
+        </td>
+        <td><div class="actions">{{ order_buttons('projects', p.id) }}</div></td>
+        <td>
+          <div class="actions">
+            <a class="btn btn-sm" href="{{ url_for('admin.project_edit', pid=p.id) }}"><i class="bi bi-pencil"></i> Edit</a>
+            {{ post_button(url_for('admin.toggle', resource='projects', item_id=p.id), 'Hide' if p.published else 'Publish', 'eye-slash' if p.published else 'eye') }}
+            {{ post_button(url_for('admin.project_feature', pid=p.id), 'Unfeature' if p.featured else 'Feature', 'star-fill' if p.featured else 'star') }}
+            {% if p.published %}<a class="btn btn-sm btn-icon" target="_blank" rel="noopener" href="{{ url_for('public.project_detail', slug=p.slug) }}" title="View on website" aria-label="View on website"><i class="bi bi-box-arrow-up-right"></i></a>{% endif %}
+            {{ post_button(url_for('admin.project_delete', pid=p.id), 'Delete', 'trash', 'btn-sm btn-icon btn-danger', "Delete '" ~ p.title ~ "' and all its images? This cannot be undone.") }}
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty"><p>No projects yet.</p><a class="btn btn-primary" href="{{ url_for('admin.project_new') }}">Add your first project</a></div>
+{% endif %}
+{% endblock %}

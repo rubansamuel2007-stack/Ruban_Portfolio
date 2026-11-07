@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script type="application/ld+json">
+{{ {"@context": "https://schema.org", "@type": "Person", "name": profile.full_name, "jobTitle": S.hero_subtitle,
+    "email": profile.email, "address": profile.location,
+    "sameAs": [profile.github_url, profile.linkedin_url]} | tojson }}
+</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================ HERO ============================ -->
+<section class="hero" id="home">
+  <div class="hero-bg" aria-hidden="true"><span class="orb orb-a"></span><span class="orb orb-b"></span><span class="grid-lines"></span></div>
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <p class="eyebrow reveal"><span class="dot"></span> {{ S.hero_subtitle }}</p>
+      <h1 class="hero-name reveal">{{ profile.full_name|upper }}</h1>
+      <p class="hero-typing reveal" aria-live="polite">
+        <span class="typed" id="typed" data-words="{{ S.typing_words|lines|join('|') }}">{{ (S.typing_words|lines)[0] if S.typing_words|lines else '' }}</span><span class="caret" aria-hidden="true"></span>
+      </p>
+      <p class="hero-tagline reveal">&ldquo;{{ S.hero_tagline }}&rdquo;</p>
+      <div class="hero-actions reveal">
+        <a class="btn btn-primary" href="#contact"><i class="bi bi-send"></i> Contact Me</a>
+        <a class="btn btn-ghost" href="#projects"><i class="bi bi-grid-1x2"></i> Explore My Projects</a>
+        {% if resume.available %}<a class="btn btn-text" href="{{ resume.download_url }}"><i class="bi bi-download"></i> Download Resume</a>{% endif %}
+      </div>
+    </div>
+    <div class="hero-photo reveal">
+      <div class="photo-frame">
+        <img src="{{ upload_url(profile.photo) if profile.photo else url_for('static', filename='img/avatar-placeholder.svg') }}"
+             alt="Portrait of {{ profile.full_name }}" width="480" height="560" fetchpriority="high">
+      </div>
+      <span class="photo-badge"><i class="bi bi-geo-alt"></i> {{ profile.location }}</span>
+    </div>
+  </div>
+  <a class="scroll-cue" href="#about" aria-label="Scroll to About"><i class="bi bi-chevron-double-down"></i></a>
+</section>
+
+<!-- ============================ ABOUT ============================ -->
+<section class="section about" id="about">
+  <div class="container about-grid">
+    <div class="section-head reveal">
+      <span class="section-num">01</span>
+      <h2>About <em>me</em></h2>
+      <p class="faith">&ldquo;{{ S.faith_tagline }}&rdquo;</p>
+    </div>
+    <div class="about-body">
+      {% for para in profile.about|paragraphs %}
+        <p class="reveal {{ 'lead' if loop.first }}">{{ para }}</p>
+      {% endfor %}
+      <div class="about-cards reveal">
+        <div class="info-card">
+          <i class="bi bi-mortarboard"></i>
+          <div>
+            <h3>Education</h3>
+            <p>{{ profile.education }}<br>{{ profile.institution }}<br><span class="muted">{{ profile.education_status }}</span></p>
+          </div>
+        </div>
+        <div class="info-card">
+          <i class="bi bi-geo-alt"></i>
+          <div><h3>Based in</h3><p>{{ profile.location }}</p></div>
+        </div>
+      </div>
+      <ul class="about-stats reveal">
+        <li><strong>{{ projects|length }}</strong><span>Projects</span></li>
+        <li><strong>{{ certificates|length }}</strong><span>Certificates</span></li>
+        <li><strong>{{ skill_count }}</strong><span>Skills</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SKILLS ============================ -->
+<section class="section skills" id="skills">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="section-num">02</span>
+      <h2>Technical <em>skills</em></h2>
+      <p class="section-sub">The tools and technologies I work with, grouped by what I use them for.</p>
+    </div>
+    <div class="skill-groups">
+      {% for category, items in skill_groups %}
+      <article class="skill-group reveal">
+        <header><span class="group-index">{{ '%02d'|format(loop.index) }}</span><h3>{{ category }}</h3></header>
+        <ul class="skill-list">
+          {% for s in items %}
+          <li class="skill">
+            <div class="skill-top">
+              <span class="skill-icon">{% if s.icon %}<i class="{{ s.icon }}" aria-hidden="true"></i>{% else %}<i class="bi bi-code-slash" aria-hidden="true"></i>{% endif %}</span>
+              <span class="skill-name">{{ s.name }}</span>
+              <span class="skill-pct">{% if s.proficiency %}{{ s.proficiency }}%{% else %}<span class="muted">&ndash;</span>{% endif %}</span>
+            </div>
+            <div class="bar" role="progressbar" aria-label="{{ s.name }} proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ s.proficiency }}">
+              <span style="--level: {{ s.proficiency }}%"></span>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </article>
+      {% else %}
+      <p class="empty">Skills will appear here once they are added in the admin dashboard.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FEATURED PROJECTS ============================ -->
+{% if featured %}
+<section class="section featured" id="featured">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-num">03</span>
+      <h2>Featured <em>projects</em></h2>
+    </div>
+    {% for p in featured %}
+    <article class="feature-row reveal {{ 'flip' if loop.index is even }}">
+      <a class="feature-media" href="{{ url_for('public.project_detail', slug=p.slug) }}" aria-label="View {{ p.title }}">
+        <img src="{{ upload_url(p.thumbnail) if p.thumbnail else url_for('static', filename='img/project-placeholder.svg') }}" alt="{{ p.title }} thumbnail" loading="lazy" width="800" height="500">
+      </a>
+      <div class="feature-info">
+        {% if p.category %}<span class="tag-cat">{{ p.category }}</span>{% endif %}
+        <h3>{{ p.title }}</h3>
+        <p>{{ p.short_description }}</p>
+        <ul class="chips">{% for t in p.tech_names %}<li>{{ t }}</li>{% endfor %}</ul>
+        <div class="card-actions">
+          <a class="btn btn-primary btn-sm" href="{{ url_for('public.project_detail', slug=p.slug) }}">View Details</a>
+          {% if p.github_url %}<a class="btn btn-ghost btn-sm" href="{{ p.github_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-github"></i> GitHub</a>{% endif %}
+          {% if p.live_url %}<a class="btn btn-ghost btn-sm" href="{{ p.live_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> Live Demo</a>{% endif %}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ============================ ALL PROJECTS ============================ -->
+<section class="section projects" id="projects">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-num">{{ '04' if featured else '03' }}</span>
+      <h2>All <em>projects</em></h2>
+    </div>
+    {% if projects %}
+    {% if categories|length > 1 %}
+    <div class="filters reveal" role="group" aria-label="Filter projects by category">
+      <button class="chip active" data-filter="all">All</button>
+      {% for c in categories %}<button class="chip" data-filter="{{ c }}">{{ c }}</button>{% endfor %}
+    </div>
+    {% endif %}
+    <div class="project-grid">
+      {% for p in projects %}
+      <article class="project-card reveal" data-category="{{ p.category }}">
+        <a class="project-thumb" href="{{ url_for('public.project_detail', slug=p.slug) }}" tabindex="-1" aria-hidden="true">
+          <img src="{{ upload_url(p.thumbnail) if p.thumbnail else url_for('static', filename='img/project-placeholder.svg') }}" alt="" loading="lazy" width="640" height="400">
+        </a>
+        <div class="project-body">
+          {% if p.category %}<span class="tag-cat">{{ p.category }}</span>{% endif %}
+          <h3><a href="{{ url_for('public.project_detail', slug=p.slug) }}">{{ p.title }}</a></h3>
+          <p>{{ p.short_description }}</p>
+          <ul class="chips">{% for t in p.tech_names %}<li>{{ t }}</li>{% endfor %}</ul>
+          <div class="card-actions">
+            <a class="btn btn-primary btn-sm" href="{{ url_for('public.project_detail', slug=p.slug) }}">View Details</a>
+            {% if p.github_url %}<a class="btn btn-ghost btn-sm" href="{{ p.github_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-github"></i> GitHub</a>{% endif %}
+            {% if p.live_url %}<a class="btn btn-ghost btn-sm" href="{{ p.live_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> Live Demo</a>{% endif %}
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-panel reveal">
+      <i class="bi bi-rocket-takeoff"></i>
+      <h3>New projects are on the way</h3>
+      <p>I'm building something new right now. In the meantime, browse my work on GitHub.</p>
+      {% if profile.github_url %}<a class="btn btn-ghost" href="{{ profile.github_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-github"></i> View GitHub Profile</a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ============================ EXPERIENCE ============================ -->
+<section class="section experience" id="experience">
+  <div class="container narrow">
+    <div class="section-head reveal">
+      <span class="section-num">05</span>
+      <h2>Internships &amp; <em>experience</em></h2>
+    </div>
+    {% if experiences %}
+    <ol class="timeline">
+      {% for e in experiences %}
+      <li class="timeline-item reveal">
+        <span class="timeline-dot"></span>
+        <div class="timeline-card">
+          <div class="timeline-meta"><span class="tag-cat">{{ e.kind }}</span><span class="muted">{{ e.period }}</span></div>
+          <h3>{{ e.role }}</h3>
+          {% if e.organization %}<p class="org">{{ e.organization }}</p>{% endif %}
+          {% if e.description %}<p>{{ e.description }}</p>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <div class="empty-panel reveal"><i class="bi bi-briefcase"></i><h3>Experience coming soon</h3><p>Internships and workshops will be listed here as I complete them.</p></div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ============================ CERTIFICATIONS ============================ -->
+<section class="section certs" id="certifications">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="section-num">06</span>
+      <h2>Certifications &amp; <em>achievements</em></h2>
+      <p class="section-sub">Courses, internships and workshops I have completed.</p>
+    </div>
+    {% if certificates %}
+    <div class="cert-grid">
+      {% for c in certificates %}
+      <article class="cert-card reveal">
+        <button class="cert-thumb" type="button"
+                data-viewer data-src="{{ upload_url(c.file_path) }}" data-type="{{ c.file_type }}"
+                data-title="{{ c.title }}" data-link="{{ c.credential_url }}" aria-label="View certificate: {{ c.title }}">
+          {% if c.file_type == 'pdf' %}
+            <span class="pdf-tile"><i class="bi bi-file-earmark-pdf"></i><small>PDF certificate</small></span>
+          {% else %}
+            <img src="{{ upload_url(c.file_path) }}" alt="" loading="lazy" width="480" height="340">
+          {% endif %}
+        </button>
+        <div class="cert-body">
+          <h3>{{ c.title }}</h3>
+          <p class="org">{{ c.organization }}{% if c.issue_date %} &middot; {{ c.issue_date.strftime('%b %Y') }}{% endif %}</p>
+          {% if c.description %}<p class="cert-desc">{{ c.description }}</p>{% endif %}
+          <button class="btn btn-ghost btn-sm" type="button" data-viewer data-src="{{ upload_url(c.file_path) }}" data-type="{{ c.file_type }}" data-title="{{ c.title }}" data-link="{{ c.credential_url }}"><i class="bi bi-eye"></i> View Certificate</button>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-panel reveal"><i class="bi bi-award"></i><h3>Certificates coming soon</h3><p>Certificates will be added here as soon as they are earned.</p></div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ============================ RESUME ============================ -->
+<section class="section resume" id="resume">
+  <div class="container">
+    <div class="resume-banner reveal">
+      <div class="resume-icon"><i class="bi bi-file-earmark-person"></i></div>
+      <div class="resume-text">
+        <h2>{{ resume.title or 'Resume' }}</h2>
+        <p>A concise overview of my education, skills and experience.</p>
+      </div>
+      {% if resume.available %}
+      <div class="resume-actions">
+        <a class="btn btn-light" href="{{ resume.view_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-eye"></i> View Resume</a>
+        <a class="btn btn-outline-light" href="{{ resume.download_url }}"><i class="bi bi-download"></i> Download Resume</a>
+      </div>
+      {% else %}<p class="muted">Resume coming soon.</p>{% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GITHUB ============================ -->
+<section class="section github" id="github">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-num">07</span>
+      <h2>On <em>GitHub</em></h2>
+    </div>
+    <div class="gh-panel reveal" id="ghPanel" data-endpoint="{{ url_for('public.github') }}">
+      <div class="gh-profile" id="ghProfile">
+        <div class="skeleton avatar"></div>
+        <div class="skeleton line"></div><div class="skeleton line short"></div>
+      </div>
+      <div class="gh-repos" id="ghRepos">
+        <div class="skeleton card"></div><div class="skeleton card"></div><div class="skeleton card"></div>
+      </div>
+    </div>
+    <div class="gh-links reveal">
+      {% if profile.github_url %}<a class="btn btn-primary" href="{{ profile.github_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-github"></i> View GitHub Profile</a>{% endif %}
+      {% if profile.linkedin_url %}<a class="btn btn-ghost" href="{{ profile.linkedin_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-linkedin"></i> LinkedIn Profile</a>{% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CONTACT ============================ -->
+<section class="section contact" id="contact">
+  <div class="container contact-grid">
+    <div class="contact-info reveal">
+      <span class="section-num">08</span>
+      <h2>Let's <em>talk</em></h2>
+      <p class="section-sub">Have an idea, an opportunity or a question? Send me a message and I'll get back to you.</p>
+      <ul class="contact-list">
+        <li><i class="bi bi-person"></i><span>{{ profile.full_name }}</span></li>
+        <li><i class="bi bi-envelope"></i><a href="mailto:{{ profile.email }}">{{ profile.email }}</a></li>
+        <li><i class="bi bi-geo-alt"></i><span>{{ profile.location }}</span></li>
+        {% if profile.phone %}<li><i class="bi bi-telephone"></i><a href="tel:{{ profile.phone }}">{{ profile.phone }}</a></li>{% endif %}
+      </ul>
+      <div class="contact-buttons">
+        {% if profile.linkedin_url %}<a class="btn btn-ghost btn-sm" href="{{ profile.linkedin_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-linkedin"></i> LinkedIn</a>{% endif %}
+        {% if profile.github_url %}<a class="btn btn-ghost btn-sm" href="{{ profile.github_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-github"></i> GitHub</a>{% endif %}
+      </div>
+    </div>
+
+    <form class="contact-form reveal" id="contactForm" novalidate>
+      <div class="field"><label for="cName">Your name</label><input id="cName" name="name" type="text" maxlength="100" autocomplete="name" required><small class="err" data-for="name"></small></div>
+      <div class="field"><label for="cEmail">Your email</label><input id="cEmail" name="email" type="email" maxlength="150" autocomplete="email" required><small class="err" data-for="email"></small></div>
+      <div class="field"><label for="cSubject">Subject</label><input id="cSubject" name="subject" type="text" maxlength="150" required><small class="err" data-for="subject"></small></div>
+      <div class="field"><label for="cMessage">Message</label><textarea id="cMessage" name="message" rows="6" maxlength="3000" required></textarea><small class="err" data-for="message"></small></div>
+      <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <button class="btn btn-primary" type="submit" id="cSubmit"><span class="btn-label"><i class="bi bi-send"></i> Send message</span><span class="spinner" hidden></span></button>
+      <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+{% endblock %}

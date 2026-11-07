@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import post_button, order_buttons, badge %}
+{% block title %}Certifications{% endblock %}
+{% block heading %}Certifications &amp; achievements{% endblock %}
+{% block actions %}<a class="btn btn-primary btn-sm" href="{{ url_for('admin.certificate_new') }}"><i class="bi bi-upload"></i> Upload certificate</a>{% endblock %}
+{% block content %}
+{% if items %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>File</th><th>Certificate</th><th>Status</th><th>Order</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for c in items %}
+      <tr>
+        <td>
+          {% if c.file_type == 'pdf' %}<a class="thumb pdf" href="{{ upload_url(c.file_path) }}" target="_blank" rel="noopener" title="Open PDF"><i class="bi bi-file-earmark-pdf"></i></a>
+          {% elif c.file_path %}<img class="thumb" loading="lazy" src="{{ upload_url(c.file_path) }}" alt="">
+          {% else %}<span class="thumb"></span>{% endif %}
+        </td>
+        <td><strong>{{ c.title }}</strong><br><span class="muted">{{ c.organization }}{% if c.issue_date %} &middot; {{ c.issue_date.strftime('%b %Y') }}{% endif %}</span></td>
+        <td>{{ badge(c.published, 'Published', 'Hidden') }} <span class="badge">{{ c.file_type|upper }}</span></td>
+        <td><div class="actions">{{ order_buttons('certificates', c.id) }}</div></td>
+        <td>
+          <div class="actions">
+            <a class="btn btn-sm" href="{{ url_for('admin.certificate_edit', cid=c.id) }}"><i class="bi bi-pencil"></i> Edit</a>
+            {{ post_button(url_for('admin.toggle', resource='certificates', item_id=c.id), 'Hide' if c.published else 'Publish', 'eye-slash' if c.published else 'eye') }}
+            {{ post_button(url_for('admin.certificate_delete', cid=c.id), 'Delete', 'trash', 'btn-sm btn-icon btn-danger', "Delete the certificate '" ~ c.title ~ "' and its file?") }}
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty"><p>No certificates yet.</p><a class="btn btn-primary" href="{{ url_for('admin.certificate_new') }}">Upload your first certificate</a></div>
+{% endif %}
+{% endblock %}

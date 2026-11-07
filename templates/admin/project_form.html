@@ -1,0 +1,72 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import csrf %}
+{% block title %}{{ 'Edit' if item else 'New' }} project{% endblock %}
+{% block heading %}{{ 'Edit project' if item else 'Add a project' }}{% endblock %}
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="form">
+  {{ csrf() }}
+
+  <section class="panel grid-2">
+    <h2 class="h2 span-2">Basics</h2>
+    <div><label for="title">Project name *</label><input id="title" name="title" value="{{ f.get('title','') }}" required maxlength="200"></div>
+    <div><label for="category">Category</label><input id="category" name="category" value="{{ f.get('category','') }}" maxlength="80" placeholder="Web App, AI/ML, Tool ..."></div>
+    <div class="span-2"><label for="short_description">Short description (shown on the project card)</label><input id="short_description" name="short_description" value="{{ f.get('short_description','') }}" maxlength="300"></div>
+    <div><label for="github_url">GitHub repository URL</label><input id="github_url" name="github_url" type="url" value="{{ f.get('github_url','') }}" maxlength="300" placeholder="https://github.com/..."></div>
+    <div><label for="live_url">Live demo URL</label><input id="live_url" name="live_url" type="url" value="{{ f.get('live_url','') }}" maxlength="300" placeholder="https://..."></div>
+    <div><label for="completed_on">Completion date</label><input id="completed_on" name="completed_on" type="date" value="{{ f.get('completed_on','') }}"></div>
+    <div>
+      <label>Visibility</label>
+      <label class="check"><input type="checkbox" name="published" {{ 'checked' if f.get('published') }}> Published (visible on the website)</label>
+      <label class="check"><input type="checkbox" name="featured" {{ 'checked' if f.get('featured') }}> Featured (shown in the Featured Projects section)</label>
+    </div>
+  </section>
+
+  <section class="panel grid-2">
+    <h2 class="h2 span-2">Project story</h2>
+    <div class="span-2"><label for="overview">Overview</label><textarea id="overview" name="overview" rows="4" maxlength="8000">{{ f.get('overview','') }}</textarea></div>
+    <div><label for="problem">Problem statement</label><textarea id="problem" name="problem" rows="5" maxlength="8000">{{ f.get('problem','') }}</textarea></div>
+    <div><label for="solution">Proposed solution</label><textarea id="solution" name="solution" rows="5" maxlength="8000">{{ f.get('solution','') }}</textarea></div>
+    <div><label for="features">Key features (one per line)</label><textarea id="features" name="features" rows="6" maxlength="8000">{{ f.get('features','') }}</textarea></div>
+    <div><label for="methodology">Development methodology</label><textarea id="methodology" name="methodology" rows="6" maxlength="8000" placeholder="e.g. Agile, iterative development with weekly goals">{{ f.get('methodology','') }}</textarea></div>
+  </section>
+
+  <section class="panel">
+    <h2 class="h2">Technologies used</h2>
+    <p class="muted">Chosen from your skills. Add missing ones on the <a href="{{ url_for('admin.skill_new') }}">Skills page</a>.</p>
+    <div class="chips">
+      {% for s in skills %}
+      <label class="chip"><input type="checkbox" name="technologies" value="{{ s.name }}" {{ 'checked' if s.name in selected }}>{% if s.icon %}<i class="{{ s.icon }}"></i>{% endif %} {{ s.name }}</label>
+      {% else %}<span class="muted">No skills available yet.</span>{% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="h2">Images</h2>
+    <div class="photo-row">
+      {% if item and item.thumbnail %}<img class="photo-preview" src="{{ upload_url(item.thumbnail) }}" alt="Current thumbnail">{% endif %}
+      <div>
+        <label for="thumbnail">Thumbnail (JPG, PNG or WebP, max 5 MB){{ ' - uploading replaces the current one' if item and item.thumbnail }}</label>
+        <input id="thumbnail" name="thumbnail" type="file" accept="image/jpeg,image/png,image/webp">
+        {% if item and item.thumbnail %}<label class="check"><input type="checkbox" name="remove_thumbnail"> Remove current thumbnail</label>{% endif %}
+      </div>
+    </div>
+    <div style="margin-top:1.2rem">
+      <label for="screenshots">Screenshots (you can select several files at once)</label>
+      <input id="screenshots" name="screenshots" type="file" multiple accept="image/jpeg,image/png,image/webp">
+    </div>
+    {% if item and item.screenshot_list %}
+    <h3 class="h2" style="margin-top:1.2rem">Current screenshots</h3>
+    <div class="shots">
+      {% for rel in item.screenshot_list %}
+      <div class="shot"><img loading="lazy" src="{{ upload_url(rel) }}" alt="Screenshot {{ loop.index }}"><label><input type="checkbox" name="delete_screenshots" value="{{ rel }}"> Delete</label></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Save project</button>
+    <a class="btn" href="{{ url_for('admin.projects') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import csrf %}
+{% block title %}Images{% endblock %}
+{% block heading %}Image management{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2 class="h2">Upload images to the library</h2>
+  <form method="post" action="{{ url_for('admin.media_upload') }}" enctype="multipart/form-data" class="grid-2">
+    {{ csrf() }}
+    <div><label for="folder">Type</label>
+      <select id="folder" name="folder"><option value="projects">Project images</option><option value="profile">Profile photos</option></select></div>
+    <div><label for="files">Images (JPG, PNG or WebP, several allowed)</label><input id="files" name="files" type="file" multiple required accept="image/jpeg,image/png,image/webp"></div>
+    <div class="span-2"><button class="btn btn-primary" type="submit"><i class="bi bi-upload"></i> Upload</button></div>
+  </form>
+  <p class="hint">Your profile photo is changed on the <a href="{{ url_for('admin.profile') }}">Profile</a> page; project thumbnails and screenshots on each <a href="{{ url_for('admin.projects') }}">project</a>. Files that are not attached to anything can be deleted here to free space.</p>
+</section>
+
+<section>
+  <h2 class="h2">All uploaded files ({{ files|length }})</h2>
+  {% if files %}
+  <div class="media-grid">
+    {% for f in files %}
+    <div class="media-card">
+      {% if f.pdf %}<div class="pdfbox"><i class="bi bi-file-earmark-pdf"></i></div>
+      {% else %}<img loading="lazy" src="{{ upload_url(f.rel) }}" alt="">{% endif %}
+      <small>{{ f.folder }} &middot; {{ f.size_kb }} KB</small>
+      <div class="actions">
+        <span class="badge {{ 'ok' if f.used else 'warn' }}">{{ 'In use' if f.used else 'Unused' }}</span>
+        <a class="btn btn-sm btn-icon" href="{{ upload_url(f.rel) }}" target="_blank" rel="noopener" aria-label="Open file"><i class="bi bi-box-arrow-up-right"></i></a>
+        {% if not f.used %}
+        <form method="post" action="{{ url_for('admin.media_delete') }}" class="inline" data-confirm="Delete this file permanently?">
+          {{ csrf() }}<input type="hidden" name="path" value="{{ f.rel }}">
+          <button class="btn btn-sm btn-icon btn-danger" type="submit" aria-label="Delete file"><i class="bi bi-trash"></i></button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}<div class="empty">No files uploaded yet.</div>{% endif %}
+</section>
+{% endblock %}

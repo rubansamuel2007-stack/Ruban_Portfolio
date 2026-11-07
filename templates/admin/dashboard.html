@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block actions %}
+  <a class="btn btn-primary btn-sm" href="{{ url_for('admin.project_new') }}"><i class="bi bi-plus-lg"></i> New project</a>
+{% endblock %}
+{% block content %}
+<div class="stats">
+  <a class="stat" href="{{ url_for('admin.projects') }}"><span>Total projects</span><strong>{{ stats.projects }}</strong></a>
+  <a class="stat" href="{{ url_for('admin.projects') }}"><span>Published projects</span><strong>{{ stats.published }}</strong></a>
+  <a class="stat" href="{{ url_for('admin.certificates') }}"><span>Certificates</span><strong>{{ stats.certificates }}</strong></a>
+  <a class="stat" href="{{ url_for('admin.skills') }}"><span>Skills</span><strong>{{ stats.skills }}</strong></a>
+  <a class="stat" href="{{ url_for('admin.messages') }}"><span>Messages</span><strong>{{ stats.messages }}</strong>{% if stats.unread %}<em>{{ stats.unread }} unread</em>{% endif %}</a>
+</div>
+
+<h2 class="h2">Quick actions</h2>
+<div class="quick">
+  <a href="{{ url_for('admin.project_new') }}"><i class="bi bi-kanban"></i> Add project</a>
+  <a href="{{ url_for('admin.certificate_new') }}"><i class="bi bi-award"></i> Upload certificate</a>
+  <a href="{{ url_for('admin.skill_new') }}"><i class="bi bi-cpu"></i> Add skill</a>
+  <a href="{{ url_for('admin.experience_new') }}"><i class="bi bi-briefcase"></i> Add experience</a>
+  <a href="{{ url_for('admin.profile') }}"><i class="bi bi-person-badge"></i> Change photo</a>
+  <a href="{{ url_for('admin.resume') }}"><i class="bi bi-file-earmark-person"></i> Update resume</a>
+</div>
+
+<div class="two-col">
+  <section class="panel">
+    <h2 class="h2">Latest updates</h2>
+    {% if activity %}
+    <ul class="activity">
+      {% for when, kind, name in activity %}
+      <li><span class="badge">{{ kind }}</span> <span>{{ name }}</span> <time class="muted">{{ when|localtime('%d %b, %I:%M %p') }}</time></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="muted">Nothing yet.</p>{% endif %}
+  </section>
+  <section class="panel">
+    <h2 class="h2">Recent messages</h2>
+    {% if latest_messages %}
+    <ul class="activity">
+      {% for m in latest_messages %}
+      <li><span class="badge {{ 'off' if m.is_read else 'warn' }}">{{ 'Read' if m.is_read else 'New' }}</span>
+        <span>{{ m.name }}: {{ m.subject }}</span> <time class="muted">{{ m.created_at|localtime('%d %b') }}</time></li>
+      {% endfor %}
+    </ul>
+    <a class="link" href="{{ url_for('admin.messages') }}">Open inbox &rarr;</a>
+    {% else %}<p class="muted">No messages yet.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

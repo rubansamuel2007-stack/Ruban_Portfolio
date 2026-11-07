@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block title %}Profile{% endblock %}
+{% block heading %}Profile management{% endblock %}
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <section class="panel">
+    <h2 class="h2">Profile photograph</h2>
+    <div class="photo-row">
+      <img class="photo-preview" src="{{ upload_url(p.photo) if p.photo else url_for('static', filename='img/avatar-placeholder.svg') }}" alt="Current profile photo" id="photoPreview">
+      <div>
+        <label for="photo">Upload or replace (JPG, PNG or WebP, max 5 MB)</label>
+        <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp">
+        {% if p.photo %}<label class="check"><input type="checkbox" name="remove_photo"> Remove current photo (use the placeholder)</label>{% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="panel grid-2">
+    <h2 class="h2 span-2">Basic details</h2>
+    <div><label for="full_name">Full name</label><input id="full_name" name="full_name" value="{{ p.full_name }}" required maxlength="100"></div>
+    <div><label for="title">Professional title</label><input id="title" name="title" value="{{ p.title }}" maxlength="150"></div>
+    <div><label for="location">Location</label><input id="location" name="location" value="{{ p.location }}" maxlength="150"></div>
+    <div><label for="tagline">Personal tagline</label><input id="tagline" name="tagline" value="{{ p.tagline }}" maxlength="200"></div>
+    <div><label for="email">Email</label><input id="email" name="email" type="email" value="{{ p.email }}" maxlength="150"></div>
+    <div><label for="phone">Contact number</label><input id="phone" name="phone" value="{{ p.phone }}" maxlength="40"></div>
+    <div><label for="linkedin_url">LinkedIn URL</label><input id="linkedin_url" name="linkedin_url" type="url" value="{{ p.linkedin_url }}" maxlength="300"></div>
+    <div><label for="github_url">GitHub URL</label><input id="github_url" name="github_url" type="url" value="{{ p.github_url }}" maxlength="300"></div>
+  </section>
+
+  <section class="panel grid-2">
+    <h2 class="h2 span-2">Education</h2>
+    <div><label for="education">Degree</label><input id="education" name="education" value="{{ p.education }}" maxlength="200"></div>
+    <div><label for="institution">Institution</label><input id="institution" name="institution" value="{{ p.institution }}" maxlength="200"></div>
+    <div><label for="education_status">Status</label><input id="education_status" name="education_status" value="{{ p.education_status }}" maxlength="100"></div>
+  </section>
+
+  <section class="panel">
+    <h2 class="h2">About me</h2>
+    <label for="about">Leave a blank line between paragraphs.</label>
+    <textarea id="about" name="about" rows="12" maxlength="5000">{{ p.about }}</textarea>
+  </section>
+
+  <div class="form-actions"><button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Save profile</button></div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById('photo').addEventListener('change', function (e) {
+    var f = e.target.files[0];
+    if (f) document.getElementById('photoPreview').src = URL.createObjectURL(f);
+  });
+</script>
+{% endblock %}

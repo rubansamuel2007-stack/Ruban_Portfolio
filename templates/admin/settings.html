@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import csrf %}
+{% block title %}Website settings{% endblock %}
+{% block heading %}Website settings{% endblock %}
+{% block content %}
+<form method="post" class="form">
+  {{ csrf() }}
+  <section class="panel grid-2">
+    <h2 class="h2 span-2">Site text</h2>
+    <div class="span-2"><label for="site_title">Website title (browser tab and search results) *</label><input id="site_title" name="site_title" value="{{ S.site_title }}" required maxlength="1000"></div>
+    <div class="span-2"><label for="meta_description">Search engine description</label><textarea id="meta_description" name="meta_description" rows="2" maxlength="1000">{{ S.meta_description }}</textarea></div>
+    <div><label for="hero_subtitle">Hero subtitle</label><input id="hero_subtitle" name="hero_subtitle" value="{{ S.hero_subtitle }}" maxlength="1000"></div>
+    <div><label for="hero_tagline">Hero tagline</label><input id="hero_tagline" name="hero_tagline" value="{{ S.hero_tagline }}" maxlength="1000"></div>
+    <div><label for="personal_tagline">Personal tagline</label><input id="personal_tagline" name="personal_tagline" value="{{ S.personal_tagline }}" maxlength="1000"></div>
+    <div><label for="faith_tagline">Faith line (About section)</label><input id="faith_tagline" name="faith_tagline" value="{{ S.faith_tagline }}" maxlength="1000"></div>
+    <div class="span-2"><label for="typing_words">Hero typing words (one per line)</label><textarea id="typing_words" name="typing_words" rows="5" maxlength="1000">{{ S.typing_words }}</textarea></div>
+    <div class="span-2"><label for="footer_text">Footer text</label><input id="footer_text" name="footer_text" value="{{ S.footer_text }}" maxlength="1000"></div>
+  </section>
+  <section class="panel grid-2">
+    <h2 class="h2 span-2">Social links</h2>
+    <div><label for="linkedin_url">LinkedIn URL</label><input id="linkedin_url" name="linkedin_url" type="url" value="{{ p.linkedin_url }}" maxlength="300"></div>
+    <div><label for="github_url">GitHub URL</label><input id="github_url" name="github_url" type="url" value="{{ p.github_url }}" maxlength="300"></div>
+  </section>
+  <div class="form-actions"><button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Save settings</button></div>
+</form>
+
+<div class="two-col">
+  <section class="panel">
+    <h2 class="h2">Change password</h2>
+    <form method="post" action="{{ url_for('admin.password') }}" autocomplete="off">
+      {{ csrf() }}
+      <label for="current_password">Current password</label><input id="current_password" name="current_password" type="password" required autocomplete="current-password">
+      <label for="new_password" style="margin-top:.8rem">New password (min 10 characters)</label><input id="new_password" name="new_password" type="password" required minlength="10" autocomplete="new-password">
+      <label for="confirm_password" style="margin-top:.8rem">Confirm new password</label><input id="confirm_password" name="confirm_password" type="password" required minlength="10" autocomplete="new-password">
+      <div class="form-actions"><button class="btn btn-primary" type="submit"><i class="bi bi-key"></i> Change password</button></div>
+    </form>
+  </section>
+  <section class="panel">
+    <h2 class="h2">Backup</h2>
+    <p>Download one ZIP with your database and every uploaded file (photos, certificates, resumes). Do this regularly, especially before redeploying.</p>
+    <a class="btn btn-primary" href="{{ url_for('admin.backup') }}"><i class="bi bi-cloud-download"></i> Download backup</a>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{# Small reusable pieces for the admin pages. #}
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro post_button(url, label, icon='', cls='btn-sm', confirm='') %}
+<form method="post" action="{{ url }}" class="inline" {% if confirm %}data-confirm="{{ confirm }}"{% endif %}>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" class="btn {{ cls }}" title="{{ label }}" aria-label="{{ label }}">{% if icon %}<i class="bi bi-{{ icon }}"></i>{% endif %}{% if not icon %}{{ label }}{% endif %}</button>
+</form>
+{% endmacro %}
+
+{% macro order_buttons(resource, item_id) %}
+{{ post_button(url_for('admin.move', resource=resource, item_id=item_id, direction='up'), 'Move up', 'arrow-up', 'btn-sm btn-icon') }}
+{{ post_button(url_for('admin.move', resource=resource, item_id=item_id, direction='down'), 'Move down', 'arrow-down', 'btn-sm btn-icon') }}
+{% endmacro %}
+
+{% macro badge(on, yes, no) %}<span class="badge {{ 'ok' if on else 'off' }}">{{ yes if on else no }}</span>{% endmacro %}

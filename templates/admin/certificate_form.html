@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import csrf %}
+{% block title %}{{ 'Edit' if item else 'Upload' }} certificate{% endblock %}
+{% block heading %}{{ 'Edit certificate' if item else 'Upload a certificate' }}{% endblock %}
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="form panel grid-2">
+  {{ csrf() }}
+  <div class="span-2"><label for="title">Certificate title *</label><input id="title" name="title" value="{{ f.get('title','') }}" required maxlength="200"></div>
+  <div><label for="organization">Issuing organization</label><input id="organization" name="organization" value="{{ f.get('organization','') }}" maxlength="200"></div>
+  <div><label for="issue_date">Issue date</label><input id="issue_date" name="issue_date" type="date" value="{{ f.get('issue_date','') }}"></div>
+  <div class="span-2"><label for="description">Description</label><textarea id="description" name="description" rows="4" maxlength="3000">{{ f.get('description','') }}</textarea></div>
+  <div class="span-2"><label for="credential_url">Credential verification URL (optional)</label><input id="credential_url" name="credential_url" type="url" value="{{ f.get('credential_url','') }}" maxlength="300" placeholder="https://..."></div>
+  <div class="span-2">
+    <label for="file">Certificate file (JPG, PNG or PDF){{ ' - choose a new file to replace the current one' if item else ' *' }}</label>
+    <input id="file" name="file" type="file" accept="image/jpeg,image/png,application/pdf" {{ 'required' if not item }}>
+    <p class="hint">Images up to 5 MB, PDFs up to 10 MB. The file type is checked on the server, not just by its name.</p>
+    {% if item and item.file_path %}
+      <p>Current file:
+        {% if item.file_type == 'pdf' %}<a href="{{ upload_url(item.file_path) }}" target="_blank" rel="noopener"><i class="bi bi-file-earmark-pdf"></i> Open PDF</a>
+        {% else %}<br><img class="photo-preview" style="width:220px;height:auto" src="{{ upload_url(item.file_path) }}" alt="Current certificate">{% endif %}
+      </p>
+    {% endif %}
+  </div>
+  <label class="check span-2"><input type="checkbox" name="published" {{ 'checked' if f.get('published') }}> Published (visible on the website)</label>
+  <div class="form-actions span-2">
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Save certificate</button>
+    <a class="btn" href="{{ url_for('admin.certificates') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}
